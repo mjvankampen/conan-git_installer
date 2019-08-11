@@ -52,6 +52,8 @@ class GitinstallerConan(ConanFile):
 
     def package_info(self):
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        if not self.settings.os_build == "Windows":
+            self.cpp_info.cflags = ["-pthread"]
         
     def package_id(self):
         del self.info.settings.compiler
