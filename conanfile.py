@@ -31,6 +31,7 @@ class GitinstallerConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
             autotools.make(target="configure")
+            autotools.libs.append("pthread")
             autotools.configure()
         return autotools
         
@@ -39,7 +40,6 @@ class GitinstallerConan(ConanFile):
             self.run(self.filename + " -y -gm2 -InstallPath=\"./\"")
         elif self.settings.os_build == "Linux":
             autotools = self._configureAutotools()
-            autotools.libs.append("pthread")
             with tools.chdir(self._source_subfolder):
                 autotools.make(target="all")
 
