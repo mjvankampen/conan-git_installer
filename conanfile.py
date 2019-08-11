@@ -31,7 +31,7 @@ class GitinstallerConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
             autotools.make(target="configure")
-            autotools.configure(args="LDFLAGS='-pthread'")
+            autotools.configure(args=["LDFLAGS='-pthread'"])
         return autotools
         
     def build(self):
