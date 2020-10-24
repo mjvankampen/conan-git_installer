@@ -27,11 +27,13 @@ class GitinstallerConan(ConanFile):
         else:
             tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
             os.rename("git-%s" % self.version, self._source_subfolder)
+            
     def _configureAutotools(self):
         with tools.chdir(self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
+            autotools.libs.append("pthread")
             autotools.make(target="configure")
-            autotools.configure(args=["LDFLAGS=-pthread"])
+            autotools.configure()
         return autotools
         
     def build(self):
