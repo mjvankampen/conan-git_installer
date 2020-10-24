@@ -3,7 +3,7 @@ import os
 
 class GitinstallerConan(ConanFile):
     name = "git_installer"
-    version = "2.22.0"
+    version = "2.29.1"
     license = "<Put the package license here>"
     author = "<Put your name here> <And your email here>"
     url = "<Package recipe repository url here, for issues about the package>"
@@ -63,8 +63,8 @@ class GitinstallerConan(ConanFile):
     def requirements(self):
     # Or add a new requirement!
         if self.settings.os_build == "Linux":
-            self.requires("libiconv/1.15@bincrafters/stable")
-            self.requires("expat/2.2.5@bincrafters/stable")
-            self.requires("OpenSSL/latest_1.1.1x@conan/stable")
-            self.requires("zlib/1.2.11@conan/stable")
-            self.requires("libcurl/7.64.1@bincrafters/stable")
+            self.requires("libiconv/1.16")
+            self.requires("expat/2.2.10")
+            self.requires("openssl/1.1.1h")
+            self.requires("zlib/1.2.11")
+            self.requires("libcurl/7.73.0")
