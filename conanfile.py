@@ -1,5 +1,6 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans import ConanFile, tools
 import os
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 
 class GitinstallerConan(ConanFile):
     name = "git_installer"
@@ -16,6 +17,7 @@ class GitinstallerConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     _source_subfolder = "source_subfolder"
     _autotools = None
+    generators = "AutotoolsToolchain"
 
     _conan_git_arch = {
         "x86": "32-bit",
@@ -36,9 +38,7 @@ class GitinstallerConan(ConanFile):
             self.filename = "PortableGit-{0}-{1}.7z.exe".format(self.version, self._conan_git_arch[str(self.settings.arch)])
             tools.download("{0}/releases/download/v{1}.windows.1/{2}".format(self.windows_homepage, self.version, self.filename), filename=self.filename)
         else:
-            tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
-            os.rename("git-%s" % self.version, self._source_subfolder)
-          
+            tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version), strip_root=True)
 
     def configure(self): 
         if self.settings.os == "Windows":
@@ -46,34 +46,31 @@ class GitinstallerConan(ConanFile):
             del self.settings.build_type
             del self.options.fPIC
             del self.options.shared
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--prefix=" + self.package_folder)
+        tc.generate()
         
     def _configure_autotools(self):
         if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-            self._autotools.libs.append("pthread")
-            self._autotools.flags.append("-pthread")
-            self.run("autoconf")
-            config_args = []
-            config_args.append("--with-iconv={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)))
-            config_args.append("--with-curl={}".format(tools.unix_path(self.deps_cpp_info["libcurl"].rootpath)))
-            self._autotools.configure(args=config_args)
+            self._autotools = Autotools(self)
+            self._autotools.make(target="configure")
+            self._autotools.configure()
         return self._autotools 
         
     def build(self):
         if self.settings.os == "Windows":
             self.run(self.filename + " -y -gm2 -InstallPath=\"./\"")
         elif self.settings.os == "Linux":
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.make()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         if self.settings.os == "Windows":
             self.copy("*", dst="", src="PortableGit")
         elif self.settings.os == "Linux":
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.install()
+            autotools = self._configure_autotools()
+            autotools.install()
 
     def package_info(self):
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
